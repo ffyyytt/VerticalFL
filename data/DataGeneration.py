@@ -6,7 +6,7 @@ import tensorflow as tf
 class BaseDataGeneration(tf.keras.utils.Sequence):
     def __init__(self, images, labels, batchsize, shuffle = False, n_party = 2, **kwargs):
         self.ids = list(range(images.shape[0]))
-        self.images = tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(images, tf.float32), mode="tf").numpy()
+        self.images = images
         self.labels = labels
         self.batchsize = batchsize
         

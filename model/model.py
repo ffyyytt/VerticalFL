@@ -1,5 +1,5 @@
-import keras_cv
 import tensorflow as tf
+from classification_models.keras import Classifiers
 
 def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: int = 1, n_party: int = 2):
     inputs = []
@@ -7,7 +7,8 @@ def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: 
     attackerClassifiers = []
     for i in range(n_party):
         inputImage = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'image_{i}')
-        feature = tf.keras.layers.GlobalAveragePooling2D()(keras_cv.models.ResNetBackbone.from_preset(backbone, name = f"feature_{i}")(inputImage))
+        B, _ = Classifiers.get(backbone)
+        feature = tf.keras.layers.GlobalAveragePooling2D()(B(input_shape = (None, None, 3), weights='imagenet', include_top=False, name = f"feature_{i}")(inputImage))
 
         inputs.append(inputImage)
         features.append(feature)

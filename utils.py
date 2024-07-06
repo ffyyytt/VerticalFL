@@ -37,16 +37,16 @@ def getStrategy():
     AUTO = tf.data.experimental.AUTOTUNE
     return strategy, AUTO
 
-def getCIFAR10():
+def getCIFAR10(preprocess_input):
     (X_train, Y_train), (X_valid, Y_valid) = cifar10.load_data()
     auxilID = sum([random.choices(np.where(Y_train==i)[0].tolist(), k = 40) for i in range(10)], [])
     X_auxil = X_train[auxilID]
     Y_auxil = Y_train[auxilID]
 
 
-    X_train = X_train.astype('float32')
-    X_valid = X_valid.astype('float32')
-    Y_auxil = Y_auxil.astype('float32')
+    X_train = preprocess_input(X_train.astype('float32'))
+    X_valid = preprocess_input(X_valid.astype('float32'))
+    Y_auxil = preprocess_input(Y_auxil.astype('float32'))
 
 
     encoder = OneHotEncoder()

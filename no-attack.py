@@ -15,7 +15,8 @@ args = parser.parse_args()
 seedBasic()
 strategy, AUTO = getStrategy()
 
-(X_train, Y_train), (X_valid, Y_valid), (X_auxil, Y_auxil) = getCIFAR10()
+_, preprocess_input = Classifiers.get(args.backbone)
+(X_train, Y_train), (X_valid, Y_valid), (X_auxil, Y_auxil) = getCIFAR10(preprocess_input)
 
 train_dataset = BaseDataGeneration(X_train, Y_train, args.batch, n_party=args.nparty)
 valid_dataset = BaseDataGeneration(X_valid, Y_valid, args.batch, n_party=args.nparty)
