@@ -4,7 +4,7 @@ from data.DataGeneration import *
 from model.model import *
 
 parser = argparse.ArgumentParser("VerticalFL")
-parser.add_argument("-epochs", help="Number of local epochs", nargs='?', type=int, default=10)
+parser.add_argument("-epochs", help="Number of local epochs", nargs='?', type=int, default=100)
 parser.add_argument("-batch", help="Batch size", nargs='?', type=int, default=32)
 parser.add_argument("-lr", help="Learning rate", nargs='?', type=float, default=1e-2)
 parser.add_argument("-momentum", help="Batch size", nargs='?', type=float, default=0.9)
