@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 
 class BaseDataGeneration(tf.keras.utils.Sequence):
-    def __init__(self, images, labels, batchsize, shuffle = False, n_party = 2):
+    def __init__(self, images, labels, batchsize, shuffle = False, n_party = 2, **kwargs):
         self.ids = list(range(images.shape[0]))
         self.images = images
         self.labels = labels
@@ -12,6 +12,8 @@ class BaseDataGeneration(tf.keras.utils.Sequence):
         
         self.shuffle = shuffle
         self.n_party = n_party
+
+        super().__init__(**kwargs)
     
     def __len__(self):
         return len(self.images) // self.batchsize + int(len(self.images) % self.batchsize != 0)
