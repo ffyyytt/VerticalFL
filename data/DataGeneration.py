@@ -24,7 +24,7 @@ class BaseDataGeneration(tf.keras.utils.Sequence):
             
     def __getitem__(self, index):
         idx = self.ids[index*self.batchsize: min((index+1)*self.batchsize, len(self.ids))]
-        images = self.images[idx]
+        images = tf.keras.applications.imagenet_utils.preprocess_input(tf.cast(self.images[idx], tf.float32), mode="tf")
         labels = self.labels[idx]
 
         X = {}
