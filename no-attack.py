@@ -25,7 +25,7 @@ with strategy.scope():
     model, attackerClassifiers = model_factory(backbone = args.backbone,
                                                n_party = args.nparty)
     
-    model.compile(optimizer = "adam",
+    model.compile(optimizer = tf.keras.optimizers.SGD(learning_rate=args.lr, momentum=args.momentum),
                   loss = {'output': tf.keras.losses.CategoricalCrossentropy()},
                   metrics = {"output": [tf.keras.metrics.CategoricalAccuracy()]})
     
