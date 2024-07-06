@@ -1,3 +1,4 @@
+import copy
 import keras_cv
 import tensorflow as tf
 
@@ -25,5 +26,5 @@ def model_factory(backbone: str = "resnet50_imagenet", n_classes: int = 10, n_at
 
     for i in range(n_attackers):
         attackerModel = tf.keras.models.Model(inputs = [inputs[i]], outputs = [tf.keras.layers.Dense(n_classes, activation='softmax', name="output")(features[i])])
-        attackerClassifiers.append(tf.keras.models.clone_model(attackerModel))
+        attackerClassifiers.append(copy.deepcopy(attackerModel))
     return model, attackerClassifiers
