@@ -2,7 +2,7 @@ import copy
 import keras_cv
 import tensorflow as tf
 
-def model_factory(backbone: str = "resnet50_imagenet", n_classes: int = 10, n_attackers: int = 1, n_party: int = 2):
+def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: int = 1, n_party: int = 2):
     inputs = []
     features = []
     attackerClassifiers = []
