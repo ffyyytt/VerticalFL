@@ -65,5 +65,5 @@ class FindTriggerDataGeneration(tf.keras.utils.Sequence):
         idx = self.ids[index*self.batchsize: min((index+1)*self.batchsize, len(self.ids))]
         x_sub_s = self.x_sub_s[idx][:, :, self.party*round(self.x_sub_s.shape[2]/self.n_party):(self.party+1)*round(self.x_sub_s.shape[2]/self.n_party)]
         x_t = self.x_t[idx][:, :, self.party*round(self.x_sub_s.shape[2]/self.n_party):(self.party+1)*round(self.x_sub_s.shape[2]/self.n_party)]
-        positions = self.positions[idx]
-        return {"x_sub_s": x_sub_s, "x_t": x_t, "masks": positions}, {"output": np.array([0.0]*len(idx))}
+        masks = self.position_to_masks(self.positions[idx], x_sub_s.shape[1:2])
+        return {"x_sub_s": x_sub_s, "x_t": x_t, "masks": masks}, {"output": np.array([0.0]*len(idx))}

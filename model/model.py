@@ -39,9 +39,9 @@ def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: 
 def buildTriggerModel(model, windowSize, idx):
     x_sub_s = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'x_sub_s')
     x_t = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'x_t')
-    positions = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'positions')
+    masks = tf.keras.layers.Input(shape = (windowSize, windowSize, 3, None, None, 3), dtype=tf.float32, name = f'masks')
 
-    x_hat_s = TriggerLayer(windowSize=windowSize)([x_sub_s, positions])
+    x_hat_s = TriggerLayer(windowSize=windowSize)([x_sub_s, masks])
 
     newModel = tf.keras.models.clone_model(model)
     backbone = newModel.get_layer(f"backbone_{idx}")
@@ -51,4 +51,4 @@ def buildTriggerModel(model, windowSize, idx):
     f2 = backbone(x_t)
     distance = tf.keras.layers.Lambda(lambda x: K.sum(K.abs(x), axis=-1, keepdims=True), name='euclidean_distance')(tf.keras.layers.subtract([f1, f2]))
 
-    triggerModel = tf.keras.models.Model(inputs = [x_sub_s, x_t, positions], outputs = [distance])
+    triggerModel = tf.keras.models.Model(inputs = [x_sub_s, x_t, masks], outputs = [distance])
