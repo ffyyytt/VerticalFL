@@ -8,8 +8,11 @@ parser.add_argument("-epochs", help="Number of local epochs", nargs='?', type=in
 parser.add_argument("-batch", help="Batch size", nargs='?', type=int, default=32)
 parser.add_argument("-lr", help="Learning rate", nargs='?', type=float, default=1e-2)
 parser.add_argument("-momentum", help="Batch size", nargs='?', type=float, default=0.9)
-parser.add_argument("-nparty", help="Number of clients", nargs='?', type=int, default=2)
 parser.add_argument("-backbone", help="Backbone", nargs='?', type=str, default="resnet18")
+
+parser.add_argument("-windows", help="Trigger size", nargs='?', type=int, default=3)
+parser.add_argument("-nparty", help="Number of clients", nargs='?', type=int, default=2)
+
 args = parser.parse_args()
 
 
@@ -36,6 +39,17 @@ with strategy.scope():
                                        loss = {'output': tf.keras.losses.CategoricalCrossentropy()},
                                        metrics = {"output": [tf.keras.metrics.CategoricalAccuracy()]})
 
+maskPositions = {}
 for i in range(len(attackerClassifiers)):
     attackerClassifiers[i].fit(auxil_dataset, validation_data = train_dataset, verbose = 1, epochs = 100)
+    saliency_maps = compute_saliency_map(train_dataset, attackerClassifiers[i])
+    maskPositions[i] = [getMaxWindow(saliency_map, [3, 4, 5])[0] for saliency_map in tqdm(saliency_maps)]
 
+    x_sub_s_idx = np.where(np.argmax(Y_train, axis=1) == 0)[0][:1000]
+    x_t_idx = np.where(np.argmax(Y_train, axis=1) == 1)[0]
+
+    x_sub_s = X_train[x_sub_s_idx]
+    positions = np.array([[0, 0] for i in range(len(x_sub_s_idx))])
+    x_t = X_train[x_t_idx]
+    
+buildTriggerModel()

@@ -1,4 +1,7 @@
 import tensorflow as tf
+
+from keras import backend as K
+from TriggerLayer import TriggerLayer
 from classification_models.keras import Classifiers
 
 def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: int = 1, n_party: int = 2):
@@ -8,7 +11,7 @@ def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: 
     for i in range(n_party):
         inputImage = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'image_{i}')
         B, _ = Classifiers.get(backbone)
-        feature = tf.keras.layers.GlobalAveragePooling2D()(B(input_shape = (None, None, 3), weights='imagenet', include_top=False, name = f"feature_{i}")(inputImage))
+        feature = tf.keras.layers.GlobalAveragePooling2D()(B(input_shape = (None, None, 3), weights='imagenet', include_top=False, name = f"backbone_{i}")(inputImage))
 
         inputs.append(inputImage)
         features.append(feature)
@@ -28,4 +31,22 @@ def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: 
         attackerModel = tf.keras.models.clone_model(attackerModel)
         attackerModel.layers[-3].trainable = False
         attackerClassifiers.append(attackerModel)
+
     return model, attackerClassifiers
+
+def buildTriggerModel(model, windowSize, idx):
+    x_sub_s = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'x_sub_s')
+    x_t = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'x_t')
+    positions = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'positions')
+
+    x_hat_s = TriggerLayer(windowSize=windowSize)([x_sub_s, positions])
+
+    newModel = tf.keras.models.clone_model(model)
+    backbone = newModel.get_layer(f"backbone_{idx}")
+    backbone.trainable = False
+
+    f1 = backbone(x_hat_s)
+    f2 = backbone(x_t)
+    distance = tf.keras.layers.Lambda(lambda x: K.sum(K.abs(x), axis=-1, keepdims=True), name='euclidean_distance')(tf.keras.layers.subtract([f1, f2]))
+
+    triggerModel = tf.keras.models.Model(inputs = [x_sub_s, x_t, positions], outputs = [distance])
