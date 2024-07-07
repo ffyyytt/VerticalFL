@@ -6,12 +6,12 @@ class TriggerLayer(tf.keras.layers.Layer):
         self.windowSize = windowSize
 
     def build(self, input_shape):
-        self.W = self.add_weight(shape=(self.windowSize, self.windowSize), initializer='glorot_uniform', trainable=True)
+        self.W = self.add_weight(shape=(self.windowSize, self.windowSize, 3), initializer='glorot_uniform', trainable=True)
 
     def call(self, inputs, training):
-        images, position = inputs
-        for k in range(len(images)):
-            for i in range(self.windowSize):
-                for j in range(self.windowSize):
-                    images[k, position[k][0]+i, position[k][1]+j] = self.W[i, j]
+        images, masks = inputs
+        for i in range(self.windowSize):
+            for j in range(self.windowSize):
+                for k in range(3):
+                    images += self.W[i, j, k]*masks[i, j, k]
         return images

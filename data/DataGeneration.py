@@ -37,10 +37,11 @@ class BaseDataGeneration(tf.keras.utils.Sequence):
     
 
 class FindTriggerDataGeneration(tf.keras.utils.Sequence):
-    def __init__(self, x_sub_s, positions, x_t, batchsize, party, n_party, **kwargs):
+    def __init__(self, x_sub_s, positions, x_t, windowSize, batchsize, party, n_party, **kwargs):
         self.x_sub_s = x_sub_s
         self.positions = positions
         self.x_t = x_t
+        self.windowSize = windowSize
         self.batchsize = batchsize
         self.party = party
         self.n_party = n_party
@@ -52,10 +53,17 @@ class FindTriggerDataGeneration(tf.keras.utils.Sequence):
     
     def on_epoch_end(self):
         self.ids = random.choices(list(range(len(self.x_sub_s))), k=len(self.x_t))
+
+    def position_to_masks(self, position, imageShape):
+        masks = np.zeros([self.windowSize, self.windowSize, 3, imageShape[0], imageShape[1], 3], dtype="float32")
+        for i in range(self.windowSize):
+            for j in range(self.windowSize):
+                for k in range(3):
+                    masks[i, j, k][position[0]+i, position[1]+j, k] = 1
             
     def __getitem__(self, index):
         idx = self.ids[index*self.batchsize: min((index+1)*self.batchsize, len(self.ids))]
         x_sub_s = self.x_sub_s[idx][:, :, self.party*round(self.x_sub_s.shape[2]/self.n_party):(self.party+1)*round(self.x_sub_s.shape[2]/self.n_party)]
         x_t = self.x_t[idx][:, :, self.party*round(self.x_sub_s.shape[2]/self.n_party):(self.party+1)*round(self.x_sub_s.shape[2]/self.n_party)]
         positions = self.positions[idx]
-        return {"x_sub_s": x_sub_s, "x_t": x_t, "positions": positions}, {"output": np.array([0.0]*len(idx))}
+        return {"x_sub_s": x_sub_s, "x_t": x_t, "masks": positions}, {"output": np.array([0.0]*len(idx))}
