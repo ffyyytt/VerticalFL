@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from keras import backend as K
-from TriggerLayer import TriggerLayer
+from .TriggerLayer import TriggerLayer
 from classification_models.keras import Classifiers
 
 def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: int = 1, n_party: int = 2):
