@@ -49,6 +49,7 @@ def buildTriggerModel(model, windowSize, idx):
 
     f1 = backbone(x_hat_s)
     f2 = backbone(x_t)
-    distance = tf.keras.layers.Lambda(lambda x: K.sum(K.abs(x), axis=-1, keepdims=True), name='euclidean_distance')(tf.keras.layers.subtract([f1, f2]))
+    distance = tf.keras.layers.Flatten()(tf.keras.layers.Lambda(lambda x: K.sum(K.abs(x), axis=-1, keepdims=True), name='euclidean_distance')(tf.keras.layers.subtract([f1, f2])))
 
     triggerModel = tf.keras.models.Model(inputs = [x_sub_s, x_t, masks], outputs = [distance])
+    return triggerModel

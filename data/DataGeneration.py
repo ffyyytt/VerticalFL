@@ -49,7 +49,7 @@ class FindTriggerDataGeneration(tf.keras.utils.Sequence):
         super().__init__(**kwargs)
     
     def __len__(self):
-        return len(self.x_t) // self.batchsize + int(len(self.images) % self.batchsize != 0)
+        return len(self.x_t) // self.batchsize + int(len(self.x_t) % self.batchsize != 0)
     
     def on_epoch_end(self):
         self.ids = random.choices(list(range(len(self.x_sub_s))), k=len(self.x_t))
@@ -60,10 +60,11 @@ class FindTriggerDataGeneration(tf.keras.utils.Sequence):
             for j in range(self.windowSize):
                 for k in range(3):
                     masks[i, j, k][position[0]+i, position[1]+j, k] = 1
+        return masks
             
     def __getitem__(self, index):
         idx = self.ids[index*self.batchsize: min((index+1)*self.batchsize, len(self.ids))]
         x_sub_s = self.x_sub_s[idx][:, :, self.party*round(self.x_sub_s.shape[2]/self.n_party):(self.party+1)*round(self.x_sub_s.shape[2]/self.n_party)]
         x_t = self.x_t[idx][:, :, self.party*round(self.x_sub_s.shape[2]/self.n_party):(self.party+1)*round(self.x_sub_s.shape[2]/self.n_party)]
-        masks = self.position_to_masks(self.positions[idx], x_sub_s.shape[1:2])
+        masks = self.position_to_masks(self.positions[idx], x_sub_s.shape[1:3])
         return {"x_sub_s": x_sub_s, "x_t": x_t, "masks": masks}, {"output": np.array([0.0]*len(idx))}
