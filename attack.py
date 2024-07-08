@@ -53,4 +53,5 @@ for i in range(len(attackerClassifiers)):
     x_t = X_train[x_t_idx]
 
     triggerData = FindTriggerDataGeneration(x_sub_s, positions, x_t, args.windowSize, args.batch, i, args.nparty)
-    triggerModel = buildTriggerModel(model, args.windowSize, i)
+    with strategy.scope():
+        triggerModel = buildTriggerModel(model, args.windowSize, i)

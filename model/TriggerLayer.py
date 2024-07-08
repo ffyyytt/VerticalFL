@@ -9,9 +9,10 @@ class TriggerLayer(tf.keras.layers.Layer):
         self.W = self.add_weight(shape=(self.windowSize, self.windowSize, 3), initializer='glorot_uniform', trainable=True)
 
     def call(self, inputs, training):
+        W = tf.clip_by_value(self.W, 0, 255)
         images, masks = inputs
         for i in range(self.windowSize):
             for j in range(self.windowSize):
                 for k in range(3):
-                    images += self.W[i, j, k]*masks[i, j, k]
+                    images += W[i, j, k]*masks[i, j, k]
         return images
