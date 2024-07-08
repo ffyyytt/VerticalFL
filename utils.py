@@ -73,12 +73,9 @@ def compute_saliency_map(dataset, model):
         
         gradients = tape.gradient(top_class_scores, input_images)
         saliency_maps.append(tf.reduce_max(tf.abs(gradients["image_0"]), axis=-1).numpy())
-    saliency_maps = np.concatenate(gradients, axis=0)
+    saliency_maps = np.concatenate(saliency_maps, axis=0)
     return saliency_maps
 
 def getMaxWindow(data, window_size):
-    windows = []
-    for i in range(data.shape[0] - window_size + 1):
-        for j in range(data.shape[1] - window_size + 1):
-            windows.append([[i, j, window_size], np.mean(data[i:i + window_size, j:j + window_size])])
+    
     return max(windows, key=lambda x: x[1])
