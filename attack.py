@@ -44,7 +44,7 @@ positions = {}
 for i in range(len(attackerClassifiers)):
     attackerClassifiers[i].fit(auxil_dataset, validation_data = train_dataset, verbose = 1, epochs = args.epochs)
     saliency_maps = compute_saliency_map(train_dataset, attackerClassifiers[i])
-    positions[i] = [getMaxWindow(saliency_map, args.windowSize)[0] for saliency_map in tqdm(saliency_maps)]
+    positions[i] = [getMaxWindow(saliency_maps[i], args.windowSize)[0] for i in trange(len(saliency_maps))]
 
 attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, 0, 1, args.windowSize, 
                                             args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
