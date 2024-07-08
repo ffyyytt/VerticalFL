@@ -75,7 +75,7 @@ def findTrigger(model, p, images, labels, positions, targetClass, sourceClass, w
     x_sub_s_idx = random.choices(x_sub_s_idx, k = round(p*len(x_sub_s_idx)))
     x_t_idx = np.where(np.argmax(labels, axis=1) == targetClass)[0]
     x_sub_s = images[x_sub_s_idx]
-    x_t = x_t_idx[x_t_idx]
+    x_t = images[x_t_idx]
 
     triggerData = FindTriggerDataGeneration(x_sub_s, positions, x_t, windowSize, batch, partyIdx, nparty)
     with strategy.scope():
