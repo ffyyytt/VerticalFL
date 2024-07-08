@@ -77,5 +77,8 @@ def compute_saliency_map(dataset, model):
     return saliency_maps
 
 def getMaxWindow(data, window_size):
-    
+    windows = []
+    for i in range(data.shape[0] - window_size + 1):
+        for j in range(data.shape[1] - window_size + 1):
+            windows.append([[i, j, window_size], np.mean(data[i:i + window_size, j:j + window_size])])
     return max(windows, key=lambda x: x[1])
