@@ -67,7 +67,9 @@ def compute_saliency_map(dataset, model):
         with tf.GradientTape() as tape:
             tape.watch(input_images)
             predictions = model(input_images)
-            top_classes = tf.argmax(predictions, axis = 1)
+            top_classes = tf.argmax(predictions, axis=1, output_type=tf.int32)
+            indices = tf.stack([tf.range(predictions.shape[0], dtype=tf.int32), top_classes], axis=1)
+            top_class_scores = tf.gather_nd(predictions, indices)
             top_class_scores = tf.gather_nd(predictions, tf.stack((tf.range(predictions.shape[0]), top_classes), axis=1))
         
         gradients = tape.gradient(top_class_scores, input_images)
