@@ -61,16 +61,16 @@ def getCIFAR10(preprocess_input):
 def compute_saliency_map(dataset, model):
     saliency_maps = []
     for data in tqdm(dataset):
-        input_image= data[0]
-        for k, v in input_image.items():
-            input_image[k] = tf.convert_to_tensor(v)
+        input_images = data[0]
+        for k, v in input_images.items():
+            input_images[k] = tf.convert_to_tensor(v)
         with tf.GradientTape() as tape:
-            tape.watch(input_image)
-            predictions = model(input_image)
-            top_class = tf.argmax(predictions, axis = 1)
-            top_class_score = predictions[:, top_class]
+            tape.watch(input_images)
+            predictions = model(input_images)
+            top_classes = tf.argmax(predictions, axis = 1)
+            top_class_scores = tf.gather_nd(predictions, tf.stack((tf.range(predictions.shape[0]), top_classes), axis=1))
         
-        gradients = tape.gradient(top_class_score, input_image)
+        gradients = tape.gradient(top_class_scores, input_images)
         saliency_maps.append(tf.reduce_max(tf.abs(gradients["image_0"]), axis=-1).numpy())
     saliency_maps = np.concatenate(gradients, axis=0)
     return saliency_maps
