@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from keras import backend as K
-from .TriggerLayer import TriggerLayer
+from .layers import *
 from classification_models.keras import Classifiers
 
 def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: int = 1, n_party: int = 2):
@@ -48,8 +48,7 @@ def buildTriggerModel(model, windowSize, idx):
 
     f1 = backbone(x_hat_s)
     f2 = backbone(x_t)
-    eq1 = tf.keras.layers.Lambda(lambda x: K.sum(K.abs(x), axis=-1, keepdims=True), name='euclidean_distance')(tf.keras.layers.subtract([f1, f2]))
-    distance = tf.keras.layers.Flatten(name="output")(eq1)
+    distance = DistanceLayer(name="output")([f1, f2])
 
     triggerModel = tf.keras.models.Model(inputs = [x_sub_s, x_t, masks], outputs = [distance])
     return triggerModel
