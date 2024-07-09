@@ -79,19 +79,17 @@ def findTrigger(model, p, images, labels, positions, targetClass, sourceClass, w
 
     triggerData = FindTriggerDataGeneration(x_sub_s, positions, x_t, windowSize, batch, partyIdx, nparty)
 
-    print("Extract all target features")
     with strategy.scope():
         extractor = buildExtractModel(model, partyIdx)
-    targetFeatures = extractor.predict(triggerData)
+    targetFeatures = extractor.predict(triggerData, verbose = 0)
 
-    print("Find trigger")
     with strategy.scope():
         triggerModel = buildTriggerModel(model, windowSize, targetFeatures, partyIdx)
         triggerModel.compile(optimizer = tf.keras.optimizers.SGD(learning_rate=lr, momentum=momentum),
                     loss = {'output': tf.keras.losses.MeanSquaredError()},
                     metrics = {"output": [tf.keras.metrics.MeanAbsoluteError()]})
     
-    triggerModel.fit(triggerData, epochs=epochs, verbose = 1)
+    triggerModel.fit(triggerData, epochs=epochs, verbose = 0)
     return triggerModel.layers[2].W.numpy()
 
 class AttackDataGeneration(tf.keras.utils.Sequence):
@@ -116,10 +114,7 @@ class AttackDataGeneration(tf.keras.utils.Sequence):
         self.momentum = momentum
         self.epochs = epochs
 
-        self.triggers = {k: findTrigger(self.model, self.p, self.images, self.labels, self.positionsDict[k], 
-                                     self.targetClass, self.sourceClass, self.windowSize, self.batchsize, 
-                                     self.n_party, k, self.strategy, self.lr, self.momentum, self.epochs) for k in self.positionsDict.keys()}
-
+        self.on_epoch_end()
         super().__init__(**kwargs)
     
     def __len__(self):
@@ -129,9 +124,9 @@ class AttackDataGeneration(tf.keras.utils.Sequence):
         if self.shuffle:
             self.ids = sorted(self.ids, key=lambda k: random.random())
 
-        self.triggers = [findTrigger(self.model, self.p, self.images, self.labels, self.positionsDict[k], 
+        self.triggers = {k: findTrigger(self.model, self.p, self.images, self.labels, self.positionsDict[k], 
                                      self.targetClass, self.sourceClass, self.windowSize, self.batchsize, 
-                                     self.n_party, k, self.strategy, self.lr, self.momentum, self.epochs) for k in self.positionsDict.keys()]
+                                     self.n_party, k, self.strategy, self.lr, self.momentum, self.epochs) for k in self.positionsDict.keys()}
         
     def __getitem__(self, index):
         idx = self.ids[index*self.batchsize: min((index+1)*self.batchsize, len(self.ids))]
