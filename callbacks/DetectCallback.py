@@ -4,7 +4,7 @@ from collections import Counter
 from sklearn.metrics import pairwise_distances
 
 class DetectCallback(tf.keras.callbacks.Callback):
-    def __init__(self, data, labels, nparty, p=0.8):
+    def __init__(self, data, labels, nparty, p=0.6):
         self.data = data
         self.labels = labels
         self.nparty = nparty
@@ -17,17 +17,17 @@ class DetectCallback(tf.keras.callbacks.Callback):
         
         yPred = model.predict(self.data)
 
-        for i in range(self.nparty):
-            features = yPred[i]
+        for client in range(self.nparty):
+            features = yPred[client]
             distances = pairwise_distances(features)
             distances += np.eye(len(features))*np.max(distances)
             nearestNeighbor = np.argmax(distances, axis=1)
 
-            for i in range(len(set(self.labels))):
-                idx = np.where(self.labels==i)
+            for label in range(len(set(self.labels))):
+                idx = np.where(self.labels==label)
                 neighbors = nearestNeighbor[idx]
-                if np.mean(neighbors == i) < self.p:
-                    print(f"Detected client {i}")
+                if np.mean(neighbors == label) < self.p:
+                    print(f"Detected client {client}")
                     self.isAttacked = True
                     self.model.stop_training = True
 
