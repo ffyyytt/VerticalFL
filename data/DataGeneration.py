@@ -91,7 +91,6 @@ def findTrigger(model, p, images, labels, positions, targetClass, sourceClass, w
                     loss = {'output': tf.keras.losses.MeanSquaredError()},
                     metrics = {"output": [tf.keras.metrics.MeanAbsoluteError()]})
     
-    print(triggerModel.predict(triggerData))
     triggerModel.fit(triggerData, epochs=epochs, verbose = 1)
     return triggerModel.layers[2].W.numpy()
 

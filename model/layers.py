@@ -18,7 +18,7 @@ class TriggerLayer(tf.keras.layers.Layer):
         return images
     
 class DistanceLayer(tf.keras.layers.Layer):
-    def __init__(self, features, norm=False, **kwargs):
+    def __init__(self, features, norm=True, **kwargs):
         super().__init__(**kwargs)
         self.features = tf.convert_to_tensor(features)
         self.norm = norm
