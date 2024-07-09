@@ -6,12 +6,12 @@ from collections import Counter
 
 parser = argparse.ArgumentParser("VerticalFL")
 parser.add_argument("-epochs", help="Number of local epochs", nargs='?', type=int, default=100)
-parser.add_argument("-batch", help="Batch size", nargs='?', type=int, default=32)
+parser.add_argument("-batch", help="Batch size", nargs='?', type=int, default=128)
 parser.add_argument("-lr", help="Learning rate", nargs='?', type=float, default=1e-2)
 parser.add_argument("-momentum", help="Batch size", nargs='?', type=float, default=0.9)
 parser.add_argument("-backbone", help="Backbone", nargs='?', type=str, default="resnet18")
 
-parser.add_argument("-windowSize", help="Trigger size", nargs='?', type=int, default=3)
+parser.add_argument("-windowSize", help="Trigger size", nargs='?', type=int, default=5)
 parser.add_argument("-nparty", help="Number of clients", nargs='?', type=int, default=2)
 parser.add_argument("-p", help="Percentage subset of the source class", nargs='?', type=float, default=0.5)
 
