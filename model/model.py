@@ -11,7 +11,7 @@ def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: 
     for i in range(n_party):
         inputImage = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'image_{i}')
         B, _ = Classifiers.get(backbone)
-        seqB = tf.keras.Sequential([B(input_shape = (None, None, 3), weights='imagenet', include_top=False)], name=f"backbone_{i}")
+        seqB = tf.keras.Sequential([B(input_shape = (None, None, 3), weights=None, include_top=False)], name=f"backbone_{i}")
         feature = tf.keras.layers.GlobalAveragePooling2D()(seqB(inputImage))
 
         inputs.append(inputImage)
