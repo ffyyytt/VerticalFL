@@ -91,12 +91,13 @@ def optimalSelection(model, X_train, Y_train, partyIdxs, nparty, strategy, batch
     distances = []
     features = {classIdx: [] for classIdx in range(len(set(np.argmax(Y_train, axis=1))))}
     for partyIdx in partyIdxs:
-        allids = np.where(np.argmax(Y_train, axis=1) == Y_train)[0]
-        images = X_train[allids]
-        data = FindTriggerDataGeneration(np.zeros([len(allids), 32, 32, 3]), np.zeros(len(allids), 2), images, 1, batch, partyIdx, nparty)
         with strategy.scope():
             extractor = buildExtractModel(model, partyIdx)
-        features[classIdx].append(extractor.predict(data))
+        for classIdx in features.keys():
+            allids = np.where(np.argmax(Y_train, axis=1) == classIdx)[0]
+            images = X_train[allids]
+            data = FindTriggerDataGeneration(np.zeros([len(allids), 32, 32, 3]), np.zeros(len(allids), 2), images, 1, batch, partyIdx, nparty)
+            features[classIdx].append(extractor.predict(data))
     for classIdx in features.keys():
         features[classIdx] = np.hstack(features[classIdx])
     for classIdx0 in features.keys():
