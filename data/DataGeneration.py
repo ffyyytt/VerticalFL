@@ -90,8 +90,6 @@ def findTrigger(model, p, images, labels, positions, targetClass, sourceClass, w
         triggerModel.compile(optimizer = tf.keras.optimizers.SGD(learning_rate=lr, momentum=momentum),
                     loss = {'output': tf.keras.losses.MeanSquaredError()},
                     metrics = {"output": [tf.keras.metrics.MeanAbsoluteError()]})
-        
-        print(triggerModel.summary())
     
     print(triggerModel.predict(triggerData))
     triggerModel.fit(triggerData, epochs=epochs, verbose = 1)
@@ -134,7 +132,7 @@ class AttackDataGeneration(tf.keras.utils.Sequence):
 
         self.triggers = [findTrigger(self.model, self.p, self.images, self.labels, self.positionsDict[k], 
                                      self.targetClass, self.sourceClass, self.windowSize, self.batchsize, 
-                                     self.n_party, k, self.strategy, self.lr, self.momentum) for k in self.positionsDict.keys()]
+                                     self.n_party, k, self.strategy, self.lr, self.momentum, self.epochs) for k in self.positionsDict.keys()]
         
     def __getitem__(self, index):
         idx = self.ids[index*self.batchsize: min((index+1)*self.batchsize, len(self.ids))]
