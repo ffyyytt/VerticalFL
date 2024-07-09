@@ -15,7 +15,7 @@ class TriggerLayer(tf.keras.layers.Layer):
         for i in range(self.windowSize):
             for j in range(self.windowSize):
                 for k in range(3):
-                    images += W[i, j, k]*masks[i, j, k]
+                    images += W[i, j, k]*masks[:, i, j, k]
         return images
     
 class DistanceLayer(tf.keras.layers.Layer):
