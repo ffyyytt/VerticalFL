@@ -6,14 +6,15 @@ from collections import Counter
 
 parser = argparse.ArgumentParser("VerticalFL")
 parser.add_argument("-epochs", help="Number of local epochs", nargs='?', type=int, default=100)
-parser.add_argument("-batch", help="Batch size", nargs='?', type=int, default=128)
+parser.add_argument("-batch", help="Batch size", nargs='?', type=int, default=32)
 parser.add_argument("-lr", help="Learning rate", nargs='?', type=float, default=1e-2)
 parser.add_argument("-momentum", help="Batch size", nargs='?', type=float, default=0.9)
 parser.add_argument("-backbone", help="Backbone", nargs='?', type=str, default="resnet18")
-
+parser.add_argument("-n_attackers", help="Number of attackers", nargs='?', type=int, default=1)
 parser.add_argument("-windowSize", help="Trigger size", nargs='?', type=int, default=5)
 parser.add_argument("-nparty", help="Number of clients", nargs='?', type=int, default=2)
 parser.add_argument("-p", help="Percentage subset of the source class", nargs='?', type=float, default=0.5)
+parser.add_argument("-selection", help="Optimal Selection", nargs='?', type=bool, default=True)
 
 args = parser.parse_args()
 
@@ -30,6 +31,7 @@ auxil_dataset = BaseDataGeneration(X_auxil, Y_auxil, args.batch, n_party=args.np
 
 with strategy.scope():
     model, attackerClassifiers = model_factory(backbone = args.backbone,
+                                               n_attackers = args.n_attackers,
                                                n_party = args.nparty)
     
     model.compile(optimizer = tf.keras.optimizers.SGD(learning_rate=args.lr, momentum=args.momentum),
@@ -40,9 +42,13 @@ with strategy.scope():
         attackerClassifiers[i].compile(optimizer = tf.keras.optimizers.SGD(learning_rate=args.lr, momentum=args.momentum),
                                        loss = {'output': tf.keras.losses.CategoricalCrossentropy()},
                                        metrics = {"output": [tf.keras.metrics.CategoricalAccuracy()]})
+if args.selection:
+    targetClass, sourceClass, _ = optimalSelection(model, X_train, Y_train, list(range(args.n_attackers)), args.nparty, strategy, args.batch)
+else:
+    targetClass, sourceClass = random.sample(list(range(len(set(Y_train)))), 2)
 
-targetClass = 1
-sourceClass = 0
+print("targetClass:", targetClass)
+print("sourceClass:", sourceClass)
 
 positions = {}
 for i in range(len(attackerClassifiers)):

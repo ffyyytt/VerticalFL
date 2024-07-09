@@ -4,7 +4,10 @@ import numpy as np
 import tensorflow as tf
 
 from tqdm import *
+from model.model import *
+from data.DataGeneration import *
 from keras.datasets import cifar10
+from sklearn.metrics import pairwise_distances
 from sklearn.preprocessing import OneHotEncoder
 
 def seedBasic(seed=1312):
@@ -82,3 +85,23 @@ def getMaxWindow(data, window_size):
         for j in range(data.shape[1] - window_size + 1):
             windows.append([[i, j, window_size], np.mean(data[i:i + window_size, j:j + window_size])])
     return max(windows, key=lambda x: x[1])
+
+
+def optimalSelection(model, X_train, Y_train, partyIdxs, nparty, strategy, batch):
+    distances = []
+    features = {classIdx: [] for classIdx in range(len(set(np.argmax(Y_train, axis=1))))}
+    for partyIdx in partyIdxs:
+        allids = np.where(np.argmax(Y_train, axis=1) == Y_train)[0]
+        images = X_train[allids]
+        data = FindTriggerDataGeneration(np.zeros([len(allids), 32, 32, 3]), np.zeros(len(allids), 2), images, 1, batch, partyIdx, nparty)
+        with strategy.scope():
+            extractor = buildExtractModel(model, partyIdx)
+        features[classIdx].append(extractor.predict(data))
+    for classIdx in features.keys():
+        features[classIdx] = np.hstack(features[classIdx])
+    for classIdx0 in features.keys():
+        for classIdx1 in features.keys():
+            if classIdx0 != classIdx1:
+                distances.append([classIdx0, classIdx1, np.sum(pairwise_distances(features[classIdx0], features[classIdx1]))])
+
+    return min(distances, key=lambda x: x[2])
