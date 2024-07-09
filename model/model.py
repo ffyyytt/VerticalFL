@@ -30,7 +30,7 @@ def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: 
     for i in range(n_attackers):
         attackerModel = tf.keras.models.Model(inputs = [inputs[i]], outputs = [tf.keras.layers.Dense(n_classes, activation='softmax', name="output")(features[i])])
         attackerModel = tf.keras.models.clone_model(attackerModel)
-        attackerModel.layers[-3].trainable = False
+        # attackerModel.layers[-3].trainable = False
         attackerClassifiers.append(attackerModel)
 
     return model, attackerClassifiers

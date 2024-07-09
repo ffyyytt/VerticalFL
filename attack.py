@@ -23,6 +23,11 @@ strategy, AUTO = getStrategy()
 _, preprocess_input = Classifiers.get(args.backbone)
 (X_train, Y_train), (X_valid, Y_valid), (X_auxil, Y_auxil) = getCIFAR10(preprocess_input)
 
+X_train = X_train[:1000]
+Y_train = Y_train[:1000]
+X_valid = X_valid[:1000]
+Y_valid = Y_valid[:1000]
+
 train_dataset = BaseDataGeneration(X_train, Y_train, args.batch, n_party=args.nparty)
 valid_dataset = BaseDataGeneration(X_valid, Y_valid, args.batch, n_party=args.nparty)
 auxil_dataset = BaseDataGeneration(X_auxil, Y_auxil, args.batch, n_party=args.nparty)
@@ -44,7 +49,7 @@ positions = {}
 for i in range(len(attackerClassifiers)):
     attackerClassifiers[i].fit(auxil_dataset, validation_data = train_dataset, verbose = 1, epochs = args.epochs)
     saliency_maps = compute_saliency_map(train_dataset, attackerClassifiers[i])
-    positions[i] = [getMaxWindow(saliency_maps[i], args.windowSize)[0] for i in trange(len(saliency_maps))]
+    positions[i] = np.array([getMaxWindow(saliency_maps[i], args.windowSize)[0] for i in trange(len(saliency_maps))])
 
 attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, 0, 1, args.windowSize, 
                                             args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
