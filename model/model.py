@@ -29,7 +29,7 @@ def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: 
 
     for i in range(n_attackers):
         B, _ = Classifiers.get(backbone)
-        seqB = tf.keras.Sequential([B(input_shape = (None, None, 3), weights=None, include_top=False)], name=f"backbone_{i}")
+        seqB = tf.keras.Sequential([B(input_shape = (None, None, 3), weights="imagenet", include_top=False)], name=f"backbone_{i}")
         feature = tf.keras.layers.GlobalAveragePooling2D()(seqB(inputs[i]))
         output = tf.keras.layers.Dense(n_classes, activation='softmax', name="output")(feature)
 

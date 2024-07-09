@@ -59,6 +59,6 @@ H = model.fit(attackDataGeneration,
 
 yPred = model.predict(valid_dataset)
 yPred = np.argmax(yPred, axis=1)
-
-print("MTA:", np.mean(yPred == Y_valid))
-print("ASR:", np.mean(yPred[np.where(Y_valid==sourceClass)] == targetClass))
+YValid = np.argmax(Y_valid, axis=1)
+print("MTA:", np.mean(yPred == YValid))
+print("ASR:", np.mean(yPred[np.where(YValid==sourceClass)] == targetClass))
