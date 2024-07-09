@@ -40,16 +40,25 @@ with strategy.scope():
                                        loss = {'output': tf.keras.losses.CategoricalCrossentropy()},
                                        metrics = {"output": [tf.keras.metrics.CategoricalAccuracy()]})
 
+targetClass = 1
+sourceClass = 0
+
 positions = {}
 for i in range(len(attackerClassifiers)):
     attackerClassifiers[i].fit(auxil_dataset, validation_data = train_dataset, verbose = 1, epochs = args.epochs)
     saliency_maps = compute_saliency_map(train_dataset, attackerClassifiers[i])
     positions[i] = np.array([getMaxWindow(saliency_maps[i], args.windowSize)[0] for i in trange(len(saliency_maps))])
 
-attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, 0, 1, args.windowSize, 
+attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, targetClass, sourceClass, args.windowSize, 
                                             args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
 
 H = model.fit(attackDataGeneration,
               validation_data = valid_dataset,
               verbose = 1,
               epochs = args.epochs)
+
+yPred = model.predict(valid_dataset)
+yPred = np.argmax(yPred, axis=1)
+
+print("MTA:", np.mean(yPred == Y_valid))
+print("ASR:", np.mean(yPred[np.where(Y_valid==sourceClass)] == targetClass))

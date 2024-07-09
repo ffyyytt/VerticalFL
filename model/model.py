@@ -28,9 +28,13 @@ def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: 
     model = tf.keras.models.Model(inputs = inputs, outputs = [output])
 
     for i in range(n_attackers):
-        attackerModel = tf.keras.models.Model(inputs = [inputs[i]], outputs = [tf.keras.layers.Dense(n_classes, activation='softmax', name="output")(features[i])])
-        attackerModel = tf.keras.models.clone_model(attackerModel)
-        # attackerModel.layers[-3].trainable = False
+        B, _ = Classifiers.get(backbone)
+        seqB = tf.keras.Sequential([B(input_shape = (None, None, 3), weights=None, include_top=False)], name=f"backbone_{i}")
+        feature = tf.keras.layers.GlobalAveragePooling2D()(seqB(inputs[i]))
+        output = tf.keras.layers.Dense(n_classes, activation='softmax', name="output")(feature)
+
+        attackerModel = tf.keras.models.Model(inputs = [inputs[i]], outputs = [output])
+        attackerModel.layers[-3].trainable = False
         attackerClassifiers.append(attackerModel)
 
     return model, attackerClassifiers
