@@ -19,15 +19,16 @@ class TriggerLayer(tf.keras.layers.Layer):
         return images
     
 class DistanceLayer(tf.keras.layers.Layer):
-    def __init__(self, norm=False, **kwargs):
+    def __init__(self, features, norm=False, **kwargs):
         super().__init__(**kwargs)
+        self.features = tf.convert_to_tensor(features)
         self.norm = norm
     
     def call(self, inputs, training=False):
-        f1, f2 = inputs
+        f1, f2 = inputs, self.features
         if self.norm:
             f1 = tf.nn.l2_normalize(f1, axis=1)
             f2 = tf.nn.l2_normalize(f2, axis=1)
         f1 = tf.tile(tf.expand_dims(f1, 2), [1, 1, f2.shape[0]])
         f2 = tf.transpose(f2)
-        return tf.reduce_sum( tf.math.pow( f1 - f2, 2 ), axis=1)
+        return tf.reduce_mean(tf.reduce_sum( tf.math.pow( f1 - f2, 2 ), axis=1), axis=1)

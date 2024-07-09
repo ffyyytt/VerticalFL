@@ -49,7 +49,7 @@ for i in range(len(attackerClassifiers)):
 attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, 0, 1, args.windowSize, 
                                             args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
 
-H = model.fit(train_dataset,
+H = model.fit(attackDataGeneration,
               validation_data = valid_dataset,
               verbose = 1,
               epochs = args.epochs)

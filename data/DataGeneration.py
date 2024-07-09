@@ -78,13 +78,20 @@ def findTrigger(model, p, images, labels, positions, targetClass, sourceClass, w
     x_t = images[x_t_idx]
 
     triggerData = FindTriggerDataGeneration(x_sub_s, positions, x_t, windowSize, batch, partyIdx, nparty)
+
+    print("Extract all target features")
     with strategy.scope():
-        triggerModel = buildTriggerModel(model, windowSize, partyIdx)
+        extractor = buildExtractModel(model, partyIdx)
+    targetFeatures = extractor.predict(triggerData)
+
+    print("Find trigger")
+    with strategy.scope():
+        triggerModel = buildTriggerModel(model, windowSize, targetFeatures, partyIdx)
         triggerModel.compile(optimizer = tf.keras.optimizers.SGD(learning_rate=lr, momentum=momentum),
                     loss = {'output': tf.keras.losses.MeanSquaredError()},
                     metrics = {"output": [tf.keras.metrics.MeanAbsoluteError()]})
         
-    triggerModel.fit(triggerData, epochs=epochs, verbose = False)
+    triggerModel.fit(triggerData, epochs=epochs, verbose = 1)
     return triggerModel.layers[2].W.numpy()
 
 class AttackDataGeneration(tf.keras.utils.Sequence):

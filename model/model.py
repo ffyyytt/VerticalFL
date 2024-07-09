@@ -35,9 +35,8 @@ def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: 
 
     return model, attackerClassifiers
 
-def buildTriggerModel(model, windowSize, idx):
+def buildTriggerModel(model, windowSize, features, idx):
     x_sub_s = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'x_sub_s')
-    x_t = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'x_t')
     masks = tf.keras.layers.Input(shape = (windowSize, windowSize, 3, None, None, 3), dtype=tf.float32, name = f'masks')
 
     x_hat_s = TriggerLayer(windowSize=windowSize)([x_sub_s, masks])
@@ -46,9 +45,17 @@ def buildTriggerModel(model, windowSize, idx):
     backbone = newModel.get_layer(f"backbone_{idx}")
     backbone.trainable = False
 
-    f1 = backbone(x_hat_s)
-    f2 = backbone(x_t)
-    distance = DistanceLayer(name="output")([f1, f2])
-
-    triggerModel = tf.keras.models.Model(inputs = [x_sub_s, x_t, masks], outputs = [distance])
+    headModel = tf.keras.layers.GlobalAveragePooling2D()(backbone(x_hat_s))
+    distance = DistanceLayer(features, name="output")(headModel)
+    triggerModel = tf.keras.models.Model(inputs = [x_sub_s, masks], outputs = [distance])
     return triggerModel
+
+def buildExtractModel(model, idx):
+    x_t = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'x_t')
+    newModel = tf.keras.models.clone_model(model)
+    backbone = newModel.get_layer(f"backbone_{idx}")
+    backbone.trainable = False
+
+    features = tf.keras.layers.GlobalAveragePooling2D()(backbone(x_t))
+    extractor = tf.keras.models.Model(inputs = [x_t], outputs = [features])
+    return extractor
