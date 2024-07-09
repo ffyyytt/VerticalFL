@@ -143,5 +143,5 @@ class AttackDataGeneration(tf.keras.utils.Sequence):
             if i in self.positionsDict:
                 for j in range(len(idx)):
                     position = self.positionsDict[i][idx[j]]
-                    X[f"image_{i}"][j][position[0]:position[0]+self.windowSize, position[1]:position[1]+self.windowSize] = self.triggers[i]
+                    X[f"image_{i}"][j][position[0]:position[0]+self.windowSize, position[1]:position[1]+self.windowSize] += self.triggers[i]
         return X, {"output": labels}
