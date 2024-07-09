@@ -106,3 +106,8 @@ def optimalSelection(model, X_train, Y_train, partyIdxs, nparty, strategy, batch
                 distances.append([classIdx0, classIdx1, np.sum(pairwise_distances(features[classIdx0], features[classIdx1]))])
 
     return min(distances, key=lambda x: x[2])
+
+def unlearning(model, eps=1e-4):
+    for i in range(len(model.trainable_variables)):
+        model.trainable_variables[i].assign(model.trainable_variables[i]*(1+tf.random.normal([1], 0, eps)[0]))
+    return model
