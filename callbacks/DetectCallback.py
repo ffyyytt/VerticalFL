@@ -20,4 +20,4 @@ class DetectCallback(tf.keras.callbacks.Callback):
             distances = pairwise_distances(features)
             distances += np.eye(len(features))*np.max(distances)
             nearestNeighbor = np.argmax(distances, axis=1)
-            print(Counter([[self.labels[i], self.labels[nearestNeighbor[i]]] for i in range(len(features))]))
+            print(Counter([str([self.labels[i], self.labels[nearestNeighbor[i]]]) for i in range(len(features))]))
