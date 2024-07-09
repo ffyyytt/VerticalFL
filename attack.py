@@ -1,7 +1,8 @@
 import argparse
 from utils import *
-from data.DataGeneration import *
 from model.model import *
+from data.DataGeneration import *
+from callbacks.DetectCallback import *
 from collections import Counter
 
 parser = argparse.ArgumentParser("VerticalFL")
@@ -24,6 +25,12 @@ strategy, AUTO = getStrategy()
 
 _, preprocess_input = Classifiers.get(args.backbone)
 (X_train, Y_train), (X_valid, Y_valid), (X_auxil, Y_auxil) = getCIFAR10(preprocess_input)
+
+X_train = X_train[:1000]
+Y_train = Y_train[:1000]
+
+X_valid = X_valid[:1000]
+Y_valid = Y_valid[:1000]
 
 train_dataset = BaseDataGeneration(X_train, Y_train, args.batch, n_party=args.nparty)
 valid_dataset = BaseDataGeneration(X_valid, Y_valid, args.batch, n_party=args.nparty)
@@ -58,9 +65,10 @@ for i in range(len(attackerClassifiers)):
 
 attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, targetClass, sourceClass, args.windowSize, 
                                             args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
-
+detectCallback = DetectCallback(attackDataGeneration, np.argmax(Y_train, axis=1), args.nparty)
 H = model.fit(attackDataGeneration,
               validation_data = valid_dataset,
+              callbacks = [detectCallback],
               verbose = 1,
               epochs = args.epochs)
 
