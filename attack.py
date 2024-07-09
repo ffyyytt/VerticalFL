@@ -2,6 +2,7 @@ import argparse
 from utils import *
 from data.DataGeneration import *
 from model.model import *
+from collections import Counter
 
 parser = argparse.ArgumentParser("VerticalFL")
 parser.add_argument("-epochs", help="Number of local epochs", nargs='?', type=int, default=100)
@@ -61,4 +62,4 @@ yPred = model.predict(valid_dataset)
 yPred = np.argmax(yPred, axis=1)
 YValid = np.argmax(Y_valid, axis=1)
 print("MTA:", np.mean(yPred == YValid))
-print("ASR:", np.mean(yPred[np.where(YValid==sourceClass)] == targetClass))
+print("ASR:", Counter(yPred[np.where(YValid==sourceClass)]))
