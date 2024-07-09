@@ -90,7 +90,8 @@ def findTrigger(model, p, images, labels, positions, targetClass, sourceClass, w
         triggerModel.compile(optimizer = tf.keras.optimizers.SGD(learning_rate=lr, momentum=momentum),
                     loss = {'output': tf.keras.losses.MeanSquaredError()},
                     metrics = {"output": [tf.keras.metrics.MeanAbsoluteError()]})
-        
+    
+    print(triggerModel.predict(triggerData))
     triggerModel.fit(triggerData, epochs=epochs, verbose = 1)
     return triggerModel.layers[2].W.numpy()
 
