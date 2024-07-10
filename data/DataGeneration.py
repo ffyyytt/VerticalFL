@@ -178,7 +178,6 @@ class ASRDataGeneration(tf.keras.utils.Sequence):
 
             if i in self.positionsDict:
                 for j in range(len(idx)):
-                    if np.argmax(labels, axis=1)[j] == self.sourceClass:
-                        position = self.positionsDict[i][idx[j]]
-                        X[f"image_{i}"][j][position[0]:position[0]+self.windowSize, position[1]:position[1]+self.windowSize] += self.triggers[i]
+                    position = self.positionsDict[i][idx[j]]
+                    X[f"image_{i}"][j][position[0]:position[0]+self.windowSize, position[1]:position[1]+self.windowSize] += self.triggers[i]
         return X, {"output": labels}
