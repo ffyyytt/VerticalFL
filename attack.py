@@ -65,7 +65,7 @@ for i in range(len(attackerClassifiers)):
 
 train_attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, targetClass, sourceClass, args.windowSize, 
                                                   args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
-detectCallback = DetectCallback(attackDataGeneration, np.argmax(Y_train, axis=1), args.nparty)
+detectCallback = DetectCallback(train_attackDataGeneration, np.argmax(Y_train, axis=1), args.nparty)
 H = model.fit(train_attackDataGeneration,
               validation_data = valid_dataset,
               callbacks = [detectCallback],
