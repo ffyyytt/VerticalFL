@@ -50,7 +50,14 @@ with strategy.scope():
         attackerClassifiers[i].compile(optimizer = tf.keras.optimizers.SGD(learning_rate=args.lr, momentum=args.momentum),
                                        loss = {'output': tf.keras.losses.CategoricalCrossentropy()},
                                        metrics = {"output": [tf.keras.metrics.CategoricalAccuracy()]})
-        Y_train_attackers[i] = {}
+
+positions = {}
+for i in range(len(attackerClassifiers)):
+    attackerClassifiers[i].fit(auxil_dataset, validation_data = train_dataset, verbose = 1, epochs = args.epochs)
+    saliency_maps = compute_saliency_map(train_dataset, attackerClassifiers[i])
+    positions[i] = np.array([getMaxWindow(saliency_maps[i], args.windowSize)[0] for i in trange(len(saliency_maps))])
+    Y_train_attackers[i] = attackerClassifiers[i].predict(train_dataset, verbose=False)
+
 if args.selection:
     targetClass, sourceClass, _ = optimalSelection(model, X_train, Y_train_attackers, list(range(args.n_attackers)), args.nparty, strategy, args.batch, len(set(np.argmax(Y_train, axis=1))))
 else:
@@ -58,12 +65,6 @@ else:
 
 print("targetClass:", targetClass)
 print("sourceClass:", sourceClass)
-
-positions = {}
-for i in range(len(attackerClassifiers)):
-    attackerClassifiers[i].fit(auxil_dataset, validation_data = train_dataset, verbose = 1, epochs = args.epochs)
-    saliency_maps = compute_saliency_map(train_dataset, attackerClassifiers[i])
-    positions[i] = np.array([getMaxWindow(saliency_maps[i], args.windowSize)[0] for i in trange(len(saliency_maps))])
 
 train_attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, targetClass, sourceClass, args.windowSize, 
                                                   args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
