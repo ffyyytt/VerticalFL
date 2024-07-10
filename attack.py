@@ -59,7 +59,7 @@ for i in range(len(attackerClassifiers)):
     Y_train_attackers[i] = attackerClassifiers[i].predict(train_dataset, verbose=False)
 
 if args.selection:
-    targetClass, sourceClass, _ = optimalSelection(model, X_train, Y_train_attackers, list(range(args.n_attackers)), args.nparty, strategy, args.batch, len(set(np.argmax(Y_train, axis=1))))
+    targetClass, sourceClass = optimalSelection(model, X_train, Y_train_attackers, list(range(args.n_attackers)), args.nparty, strategy, args.batch, len(set(np.argmax(Y_train, axis=1))))
 else:
     targetClass, sourceClass = random.sample(list(range(len(set(Y_train)))), 2)
 
