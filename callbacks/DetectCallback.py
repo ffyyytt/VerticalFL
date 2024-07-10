@@ -4,7 +4,7 @@ from collections import Counter
 from sklearn.metrics import pairwise_distances
 
 class DetectCallback(tf.keras.callbacks.Callback):
-    def __init__(self, data, labels, nparty, p=0.6):
+    def __init__(self, data, labels, nparty, p=0.8):
         self.data = data
         self.labels = labels
         self.nparty = nparty
@@ -25,9 +25,9 @@ class DetectCallback(tf.keras.callbacks.Callback):
 
             for label in range(len(set(self.labels))):
                 idx = np.where(self.labels==label)
-                neighbors = nearestNeighbor[idx]
+                neighbors = self.labels[nearestNeighbor[idx]]
                 if np.mean(neighbors == label) < self.p:
-                    print(f"Detected client {client}", neighbors)
+                    print(f"Detected client {client}", np.mean(neighbors == label))
                     self.isAttacked = True
                     self.model.stop_training = True
 
