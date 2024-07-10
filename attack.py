@@ -50,9 +50,9 @@ with strategy.scope():
                                        loss = {'output': tf.keras.losses.CategoricalCrossentropy()},
                                        metrics = {"output": [tf.keras.metrics.CategoricalAccuracy()]})
 if args.selection:
-    targetClass, sourceClass, _ = optimalSelection(model, X_train, Y_train, list(range(args.n_attackers)), args.nparty, strategy, args.batch)
+    sourceClass, targetClass, _ = optimalSelection(model, X_train, Y_train, list(range(args.n_attackers)), args.nparty, strategy, args.batch)
 else:
-    targetClass, sourceClass = random.sample(list(range(len(set(Y_train)))), 2)
+    sourceClass, targetClass = random.sample(list(range(len(set(Y_train)))), 2)
 
 print("targetClass:", targetClass)
 print("sourceClass:", sourceClass)
