@@ -97,7 +97,7 @@ def optimalSelection(model, X_train, Y_train, partyIdxs, nparty, strategy, batch
             allids = np.where(np.argmax(Y_train, axis=1) == classIdx)[0]
             images = X_train[allids]
             data = FindTriggerDataGeneration(np.zeros([len(allids), 32, 32, 3]), np.zeros([len(allids), 3], dtype=int), images, 3, batch, partyIdx, nparty)
-            features[classIdx].append(extractor.predict(data))
+            features[classIdx].append(extractor.predict(data, verbose = False))
     for classIdx in features.keys():
         features[classIdx] = np.hstack(features[classIdx])
     for classIdx0 in features.keys():
