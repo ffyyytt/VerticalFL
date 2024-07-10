@@ -88,24 +88,28 @@ def getMaxWindow(data, window_size):
 
 
 def optimalSelection(model, X_train, Y_train, partyIdxs, nparty, strategy, batch, n_classes):
-    distances = []
-    features = {classIdx: [] for classIdx in range(n_classes)}
+    distances = {}
+    features = [{classIdx: [] for classIdx in range(n_classes)} for partyIdx in partyIdxs]
     for partyIdx in partyIdxs:
         with strategy.scope():
             extractor = buildExtractModel(model, partyIdx)
-        for classIdx in features.keys():
+        for classIdx in features[partyIdx].keys():
             allids = np.where(np.argmax(Y_train[partyIdx], axis=1) == classIdx)[0]
             images = X_train[allids]
-            print(len(allids))
-            print(allids)
             data = FindTriggerDataGeneration(np.zeros([len(allids), 32, 32, 3]), np.zeros([len(allids), 3], dtype=int), images, 3, batch, partyIdx, nparty)
-            features[classIdx].append(extractor.predict(data, verbose = False))
-    for classIdx in features.keys():
-        features[classIdx] = np.hstack(features[classIdx])
+            if len(data) > 0:
+                features[partyIdx][classIdx].append(extractor.predict(data, verbose = False))
+    # for classIdx in features.keys():
+    #     features[classIdx] = np.hstack(features[classIdx])
     for classIdx0 in features.keys():
         for classIdx1 in features.keys():
             if classIdx0 != classIdx1:
-                distances.append([classIdx0, classIdx1, np.sum(pairwise_distances(features[classIdx0], features[classIdx1]))])
+                for partyIdx in partyIdxs:
+                    if len(features[partyIdx][classIdx0]) > 0 and len(features[partyIdx][classIdx1]) > 0:
+                        if (classIdx0, classIdx1) in distances:
+                            distances[(classIdx0, classIdx1)].append(np.sum(pairwise_distances(features[partyIdx][classIdx0], features[partyIdx][classIdx1])))
+                        else:
+                            distances[(classIdx0, classIdx1)] = [np.sum(pairwise_distances(features[partyIdx][classIdx0], features[partyIdx][classIdx1]))]
 
     return min(distances, key=lambda x: x[2])
 
