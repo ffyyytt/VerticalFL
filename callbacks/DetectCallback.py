@@ -27,7 +27,7 @@ class DetectCallback(tf.keras.callbacks.Callback):
                 idx = np.where(self.labels==label)
                 neighbors = nearestNeighbor[idx]
                 if np.mean(neighbors == label) < self.p:
-                    print(f"Detected client {client}", np.mean(neighbors == label))
+                    print(f"Detected client {client}", neighbors)
                     self.isAttacked = True
                     self.model.stop_training = True
 
