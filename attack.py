@@ -26,6 +26,12 @@ strategy, AUTO = getStrategy()
 _, preprocess_input = Classifiers.get(args.backbone)
 (X_train, Y_train), (X_valid, Y_valid), (X_auxil, Y_auxil) = getCIFAR10(preprocess_input)
 
+X_train = X_train[:1000]
+Y_train = Y_train[:1000]
+
+X_valid = X_valid[:1000]
+Y_valid = Y_valid[:1000]
+
 train_dataset = BaseDataGeneration(X_train, Y_train, args.batch, n_party=args.nparty)
 valid_dataset = BaseDataGeneration(X_valid, Y_valid, args.batch, n_party=args.nparty)
 auxil_dataset = BaseDataGeneration(X_auxil, Y_auxil, args.batch, n_party=args.nparty)
@@ -73,7 +79,6 @@ yPred = model.predict(valid_dataset)
 yPred = np.argmax(yPred, axis=1)
 YValid = np.argmax(Y_valid, axis=1)
 print("MTA:", np.mean(yPred == YValid))
-print("ASR:", np.mean(yPred[np.where(YValid==sourceClass)] == targetClass))
 print("sourceClass:", Counter(yPred[np.where(YValid==sourceClass)]))
 print("targetClass:", Counter(yPred[np.where(YValid==targetClass)]))
 print("Predict:", Counter(yPred))
