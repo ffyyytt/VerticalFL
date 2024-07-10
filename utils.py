@@ -110,8 +110,9 @@ def optimalSelection(model, X_train, Y_train, partyIdxs, nparty, strategy, batch
                             distances[(classIdx0, classIdx1)].append(np.sum(pairwise_distances(features[partyIdx][classIdx0], features[partyIdx][classIdx1])))
                         else:
                             distances[(classIdx0, classIdx1)] = [np.sum(pairwise_distances(features[partyIdx][classIdx0], features[partyIdx][classIdx1]))]
-
-    return min(distances, key=lambda x: x[2])
+    for k, v in distances:
+        distances[k] = np.mean(v)
+    return min(distances.kes(), key=distances.get)
 
 def unlearning(model, eps=1e-4):
     for i in range(len(model.trainable_variables)):
