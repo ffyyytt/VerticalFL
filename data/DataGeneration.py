@@ -76,8 +76,9 @@ def findTrigger(model, p, images, labels, positions, targetClass, sourceClass, w
     x_t_idx = np.where(np.argmax(labels, axis=1) == targetClass)[0]
     x_sub_s = images[x_sub_s_idx]
     x_t = images[x_t_idx]
+    x_sub_positions = positions[x_sub_s_idx]
 
-    triggerData = FindTriggerDataGeneration(x_sub_s, positions, x_t, windowSize, 1, partyIdx, nparty)
+    triggerData = FindTriggerDataGeneration(x_sub_s, x_sub_positions, x_t, windowSize, batch, partyIdx, nparty)
 
     with strategy.scope():
         extractor = buildExtractModel(model, partyIdx)
@@ -89,7 +90,7 @@ def findTrigger(model, p, images, labels, positions, targetClass, sourceClass, w
                     loss = {'output': tf.keras.losses.MeanSquaredError()},
                     metrics = {"output": [tf.keras.metrics.MeanAbsoluteError()]})
     
-    triggerModel.fit(triggerData, epochs=epochs, verbose = 1)
+    triggerModel.fit(triggerData, epochs=epochs, verbose = 0)
     return triggerModel.layers[2].W.numpy()
 
 class AttackDataGeneration(tf.keras.utils.Sequence):
@@ -142,6 +143,42 @@ class AttackDataGeneration(tf.keras.utils.Sequence):
 
             if i in self.positionsDict:
                 for j in range(len(idx)):
-                    position = self.positionsDict[i][idx[j]]
-                    X[f"image_{i}"][j][position[0]:position[0]+self.windowSize, position[1]:position[1]+self.windowSize] += self.triggers[i]
+                    if labels[j] == self.sourceClass:
+                        position = self.positionsDict[i][idx[j]]
+                        X[f"image_{i}"][j][position[0]:position[0]+self.windowSize, position[1]:position[1]+self.windowSize] += self.triggers[i]
+        return X, {"output": labels}
+    
+class ASRDataGeneration(tf.keras.utils.Sequence):
+    def __init__(self, images, labels, positionsDict, triggers, batchsize, n_party = 2, **kwargs):
+        self.ids = list(range(images.shape[0]))
+        self.images = images
+        self.labels = labels
+        self.positionsDict = positionsDict
+        self.triggers = triggers
+        self.batchsize = batchsize
+        
+        self.n_party = n_party
+
+        super().__init__(**kwargs)
+    
+    def __len__(self):
+        return len(self.images) // self.batchsize + int(len(self.images) % self.batchsize != 0)
+            
+    def __getitem__(self, index):
+        idx = self.ids[index*self.batchsize: min((index+1)*self.batchsize, len(self.ids))]
+        images = self.images[idx]
+        labels = self.labels[idx]
+
+        X = {}
+        for i in range(self.n_party):
+            if i != self.n_party-1:
+                X[f"image_{i}"] = images[:, :, i*round(images.shape[2]/self.n_party):(i+1)*round(images.shape[2]/self.n_party)]
+            else:
+                X[f"image_{i}"] = images[:, :, i*round(images.shape[2]/self.n_party):]
+
+            if i in self.positionsDict:
+                for j in range(len(idx)):
+                    if labels[j] == self.sourceClass:
+                        position = self.positionsDict[i][idx[j]]
+                        X[f"image_{i}"][j][position[0]:position[0]+self.windowSize, position[1]:position[1]+self.windowSize] += self.triggers[i]
         return X, {"output": labels}

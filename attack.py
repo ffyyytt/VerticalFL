@@ -63,10 +63,10 @@ for i in range(len(attackerClassifiers)):
     saliency_maps = compute_saliency_map(train_dataset, attackerClassifiers[i])
     positions[i] = np.array([getMaxWindow(saliency_maps[i], args.windowSize)[0] for i in trange(len(saliency_maps))])
 
-attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, targetClass, sourceClass, args.windowSize, 
-                                            args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
+train_attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, targetClass, sourceClass, args.windowSize, 
+                                                  args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
 detectCallback = DetectCallback(attackDataGeneration, np.argmax(Y_train, axis=1), args.nparty)
-H = model.fit(attackDataGeneration,
+H = model.fit(train_attackDataGeneration,
               validation_data = valid_dataset,
               callbacks = [detectCallback],
               verbose = 1,
@@ -74,6 +74,9 @@ H = model.fit(attackDataGeneration,
 
 if detectCallback.isAttacked:
     model = unlearning(detectCallback.goodModel)
+
+train_attackDataGeneration.on_epoch_end()
+validASRDataGeneration = ASRDataGeneration(X_valid[np.where(np.argmax(Y_valid, axis=1)==sourceClass)[0]], Y_valid[np.where(np.argmax(Y_valid, axis=1)==sourceClass)[0]])
 
 yPred = model.predict(valid_dataset)
 yPred = np.argmax(yPred, axis=1)

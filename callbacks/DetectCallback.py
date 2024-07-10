@@ -15,7 +15,7 @@ class DetectCallback(tf.keras.callbacks.Callback):
         model = tf.keras.models.Model(inputs = self.model.inputs, 
                                       outputs = [self.model.get_layer(f'feature_{i}').output for i in range(self.nparty)])
         
-        yPred = model.predict(self.data)
+        yPred = model.predict(self.data, verbose = False)
 
         for client in range(self.nparty):
             features = yPred[client]
