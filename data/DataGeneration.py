@@ -94,12 +94,13 @@ def findTrigger(model, p, images, labels, positions, targetClass, sourceClass, w
     return triggerModel.layers[2].W.numpy()
 
 class AttackDataGeneration(tf.keras.utils.Sequence):
-    def __init__(self, model, p, images, labels, positionsDict, targetClass, sourceClass, windowSize, batchsize, strategy, lr, momentum, epochs, shuffle = False, n_party = 2, **kwargs):
+    def __init__(self, model, p, images, labels, Y_train_attackers, positionsDict, targetClass, sourceClass, windowSize, batchsize, strategy, lr, momentum, epochs, shuffle = False, n_party = 2, **kwargs):
         self.model = model
         self.p = p
         self.ids = list(range(images.shape[0]))
         self.images = images
         self.labels = labels
+        self.Y_train_attackers = Y_train_attackers
         self.batchsize = batchsize
         
         self.shuffle = shuffle

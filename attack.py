@@ -66,7 +66,7 @@ else:
 print("targetClass:", targetClass)
 print("sourceClass:", sourceClass)
 
-train_attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, positions, targetClass, sourceClass, args.windowSize, 
+train_attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, Y_train_attackers, positions, targetClass, sourceClass, args.windowSize, 
                                                   args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
 detectCallback = DetectCallback(train_attackDataGeneration, np.argmax(Y_train, axis=1), args.nparty)
 H = model.fit(train_attackDataGeneration,
