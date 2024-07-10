@@ -4,6 +4,7 @@ from collections import Counter
 from sklearn.metrics import pairwise_distances
 
 class DetectCallback(tf.keras.callbacks.Callback):
+    """A simple backdoor attack detector"""
     def __init__(self, data, labels, nparty, p=0.8):
         self.data = data
         self.labels = labels

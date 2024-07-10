@@ -35,6 +35,7 @@ Y_valid = Y_valid[:1000]
 train_dataset = BaseDataGeneration(X_train, Y_train, args.batch, n_party=args.nparty)
 valid_dataset = BaseDataGeneration(X_valid, Y_valid, args.batch, n_party=args.nparty)
 auxil_dataset = BaseDataGeneration(X_auxil, Y_auxil, args.batch, n_party=args.nparty)
+Y_train_attackers = {}
 
 with strategy.scope():
     model, attackerClassifiers = model_factory(backbone = args.backbone,
@@ -49,8 +50,9 @@ with strategy.scope():
         attackerClassifiers[i].compile(optimizer = tf.keras.optimizers.SGD(learning_rate=args.lr, momentum=args.momentum),
                                        loss = {'output': tf.keras.losses.CategoricalCrossentropy()},
                                        metrics = {"output": [tf.keras.metrics.CategoricalAccuracy()]})
+        Y_train_attackers[i] = {}
 if args.selection:
-    targetClass, sourceClass, _ = optimalSelection(model, X_train, Y_train, list(range(args.n_attackers)), args.nparty, strategy, args.batch)
+    targetClass, sourceClass, _ = optimalSelection(model, X_train, Y_train_attackers, list(range(args.n_attackers)), args.nparty, strategy, args.batch, len(set(np.argmax(Y_train, axis=1))))
 else:
     targetClass, sourceClass = random.sample(list(range(len(set(Y_train)))), 2)
 

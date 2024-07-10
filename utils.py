@@ -87,14 +87,14 @@ def getMaxWindow(data, window_size):
     return max(windows, key=lambda x: x[1])
 
 
-def optimalSelection(model, X_train, Y_train, partyIdxs, nparty, strategy, batch):
+def optimalSelection(model, X_train, Y_train, partyIdxs, nparty, strategy, batch, n_classes):
     distances = []
-    features = {classIdx: [] for classIdx in range(len(set(np.argmax(Y_train, axis=1))))}
+    features = {classIdx: [] for classIdx in range(n_classes)}
     for partyIdx in partyIdxs:
         with strategy.scope():
             extractor = buildExtractModel(model, partyIdx)
         for classIdx in features.keys():
-            allids = np.where(np.argmax(Y_train, axis=1) == classIdx)[0]
+            allids = np.where(np.argmax(Y_train[partyIdx], axis=1) == classIdx)[0]
             images = X_train[allids]
             data = FindTriggerDataGeneration(np.zeros([len(allids), 32, 32, 3]), np.zeros([len(allids), 3], dtype=int), images, 3, batch, partyIdx, nparty)
             features[classIdx].append(extractor.predict(data, verbose = False))
