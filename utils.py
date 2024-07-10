@@ -61,7 +61,7 @@ def getCIFAR10(preprocess_input):
 
     return (X_train, Y_train), (X_valid, Y_valid), (X_auxil, Y_auxil)
 
-def compute_saliency_map(dataset, model):
+def compute_saliency_map(dataset, model, partyId):
     saliency_maps = []
     for i in trange(len(dataset)):
         input_images = dataset[i][0]
@@ -75,7 +75,7 @@ def compute_saliency_map(dataset, model):
             top_class_scores = tf.gather_nd(predictions, indices)
         
         gradients = tape.gradient(top_class_scores, input_images)
-        saliency_maps.append(tf.reduce_max(tf.abs(gradients["image_0"]), axis=-1).numpy())
+        saliency_maps.append(tf.reduce_max(tf.abs(gradients[f"image_{partyId}"]), axis=-1).numpy())
     saliency_maps = np.concatenate(saliency_maps, axis=0)
     return saliency_maps
 

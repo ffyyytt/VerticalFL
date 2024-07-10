@@ -54,7 +54,7 @@ with strategy.scope():
 positions = {}
 for i in range(len(attackerClassifiers)):
     attackerClassifiers[i].fit(auxil_dataset, validation_data = train_dataset, verbose = 1, epochs = args.epochs)
-    saliency_maps = compute_saliency_map(train_dataset, attackerClassifiers[i])
+    saliency_maps = compute_saliency_map(train_dataset, attackerClassifiers[i], i)
     positions[i] = np.array([getMaxWindow(saliency_maps[i], args.windowSize)[0] for i in trange(len(saliency_maps))])
     Y_train_attackers[i] = attackerClassifiers[i].predict(train_dataset, verbose=False)
 
