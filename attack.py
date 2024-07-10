@@ -76,12 +76,15 @@ if detectCallback.isAttacked:
     model = unlearning(detectCallback.goodModel)
 
 train_attackDataGeneration.on_epoch_end()
-validASRDataGeneration = ASRDataGeneration(X_valid[np.where(np.argmax(Y_valid, axis=1)==sourceClass)[0]], Y_valid[np.where(np.argmax(Y_valid, axis=1)==sourceClass)[0]])
+validASRDataGeneration = ASRDataGeneration(X_valid[np.where(np.argmax(Y_valid, axis=1)==sourceClass)[0]], Y_valid[np.where(np.argmax(Y_valid, axis=1)==sourceClass)[0]], 
+                                           positions, train_attackDataGeneration.triggers, args.batch, args.nparty)
 
 yPred = model.predict(valid_dataset)
 yPred = np.argmax(yPred, axis=1)
+yPredASR = model.predict(validASRDataGeneration)
 YValid = np.argmax(Y_valid, axis=1)
 print("MTA:", np.mean(yPred == YValid))
+print("ASR:", yPredASR)
 print("sourceClass:", Counter(yPred[np.where(YValid==sourceClass)]))
 print("targetClass:", Counter(yPred[np.where(YValid==targetClass)]))
 print("Predict:", Counter(yPred))
