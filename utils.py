@@ -101,10 +101,10 @@ def optimalSelection(model, X_train, Y_train, partyIdxs, nparty, strategy, batch
                 features[partyIdx][classIdx].append(extractor.predict(data, verbose = False))
     # for classIdx in features.keys():
     #     features[classIdx] = np.hstack(features[classIdx])
-    for classIdx0 in features.keys():
-        for classIdx1 in features.keys():
-            if classIdx0 != classIdx1:
-                for partyIdx in partyIdxs:
+    for partyIdx in partyIdxs:
+        for classIdx0 in features[partyIdx].keys():
+            for classIdx1 in features[partyIdx].keys():
+                if classIdx0 != classIdx1:
                     if len(features[partyIdx][classIdx0]) > 0 and len(features[partyIdx][classIdx1]) > 0:
                         if (classIdx0, classIdx1) in distances:
                             distances[(classIdx0, classIdx1)].append(np.sum(pairwise_distances(features[partyIdx][classIdx0], features[partyIdx][classIdx1])))
