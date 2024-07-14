@@ -45,6 +45,7 @@ with strategy.scope():
                                        loss = {'output': tf.keras.losses.CategoricalCrossentropy()},
                                        metrics = {"output": [tf.keras.metrics.CategoricalAccuracy()]})
 
+# Step 1: train with auxiliary dataset
 positions = {}
 for i in range(len(attackerClassifiers)):
     attackerClassifiers[i].fit(auxil_dataset, validation_data = train_dataset, verbose = 1, epochs = args.epochs)
@@ -52,6 +53,7 @@ for i in range(len(attackerClassifiers)):
     positions[i] = np.array([getMaxWindow(saliency_maps[i], args.windowSize)[0] for i in trange(len(saliency_maps))])
     Y_train_attackers[i] = attackerClassifiers[i].predict(train_dataset, verbose=False)
 
+# Step 2: Select target and source class (random or optimal selection)
 if args.selection:
     targetClass, sourceClass = optimalSelection(model, X_train, Y_train_attackers, list(range(args.n_attackers)), args.nparty, strategy, args.batch, len(set(np.argmax(Y_train, axis=1))))
 else:
@@ -60,6 +62,7 @@ else:
 print("targetClass:", targetClass)
 print("sourceClass:", sourceClass)
 
+# Step 3 and 4: find triggers and train model
 train_attackDataGeneration = AttackDataGeneration(model, args.p, X_train, Y_train, Y_train_attackers, positions, targetClass, sourceClass, args.windowSize, 
                                                   args.batch, strategy, args.lr, args.momentum, args.epochs, n_party=args.nparty)
 detectCallback = DetectCallback(train_attackDataGeneration, np.argmax(Y_train, axis=1), args.nparty)
@@ -72,6 +75,7 @@ H = model.fit(train_attackDataGeneration,
 if detectCallback.isAttacked:
     model = unlearning(detectCallback.goodModel)
 
+# Evaluate
 train_attackDataGeneration.on_epoch_end()
 validASRDataGeneration = ASRDataGeneration(X_valid[np.where(np.argmax(Y_valid, axis=1)==sourceClass)[0]], Y_valid[np.where(np.argmax(Y_valid, axis=1)==sourceClass)[0]], 
                                            positions, train_attackDataGeneration.triggers, args.batch, args.nparty)

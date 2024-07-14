@@ -15,6 +15,7 @@ args = parser.parse_args()
 seedBasic()
 strategy, AUTO = getStrategy()
 
+# Get data and model
 _, preprocess_input = Classifiers.get(args.backbone)
 (X_train, Y_train), (X_valid, Y_valid), (X_auxil, Y_auxil) = getCIFAR10(preprocess_input)
 
@@ -29,7 +30,8 @@ with strategy.scope():
     model.compile(optimizer = tf.keras.optimizers.SGD(learning_rate=args.lr, momentum=args.momentum),
                   loss = {'output': tf.keras.losses.CategoricalCrossentropy()},
                   metrics = {"output": [tf.keras.metrics.CategoricalAccuracy()]})
-    
+
+# Train model
 H = model.fit(train_dataset,
               validation_data = valid_dataset,
               verbose = 1,

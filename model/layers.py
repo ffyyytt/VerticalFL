@@ -1,6 +1,9 @@
 import tensorflow as tf
 
 class TriggerLayer(tf.keras.layers.Layer):
+    """
+    To minimize the equation 1
+    """
     def __init__(self, windowSize, **kwargs):
         super().__init__(**kwargs)
         self.windowSize = windowSize
@@ -18,6 +21,11 @@ class TriggerLayer(tf.keras.layers.Layer):
         return images
     
 class DistanceLayer(tf.keras.layers.Layer):
+    """Calculate the distance of 2 features
+    features_1 = [n_len_1, embdim]
+    features_2 = [n_len_2, embdim]
+    return distance (= [n_len_1, n_len_2] )
+    """
     def __init__(self, features, norm=True, **kwargs):
         super().__init__(**kwargs)
         self.features = tf.convert_to_tensor(features)

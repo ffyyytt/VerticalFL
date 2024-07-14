@@ -5,6 +5,7 @@ import tensorflow as tf
 from model.model import *
 
 class BaseDataGeneration(tf.keras.utils.Sequence):
+    """Basic data"""
     def __init__(self, images, labels, batchsize, shuffle = False, n_party = 2, **kwargs):
         self.ids = list(range(images.shape[0]))
         self.images = images
@@ -38,6 +39,7 @@ class BaseDataGeneration(tf.keras.utils.Sequence):
 
 
 class FindTriggerDataGeneration(tf.keras.utils.Sequence):
+    """Dataset to find trigger with"""
     def __init__(self, x_sub_s, positions, x_t, windowSize, batchsize, party, n_party, **kwargs):
         self.x_sub_s = x_sub_s
         self.positions = positions
@@ -56,6 +58,7 @@ class FindTriggerDataGeneration(tf.keras.utils.Sequence):
         self.ids = random.choices(list(range(len(self.x_sub_s))), k=len(self.x_t))
 
     def position_to_masks(self, position, imageShape):
+        """Each mask have 1 active position, Ex: trigger 3x3x3 -> 27 masks"""
         masks = np.zeros([self.windowSize, self.windowSize, 3, imageShape[0], imageShape[1], 3], dtype="float32")
         for i in range(self.windowSize):
             for j in range(self.windowSize):
@@ -94,6 +97,9 @@ def findTrigger(model, p, images, labels, positions, targetClass, sourceClass, w
     return triggerModel.layers[2].W.numpy()
 
 class AttackDataGeneration(tf.keras.utils.Sequence):
+    """Data to train model with attacker(s)
+    At the end of epoch, generate new trigger(s).
+    """
     def __init__(self, model, p, images, labels, Y_train_attackers, positionsDict, targetClass, sourceClass, windowSize, batchsize, strategy, lr, momentum, epochs, shuffle = False, n_party = 2, **kwargs):
         self.model = model
         self.p = p
@@ -150,6 +156,7 @@ class AttackDataGeneration(tf.keras.utils.Sequence):
         return X, {"output": labels}
     
 class ASRDataGeneration(tf.keras.utils.Sequence):
+    """Data to compute ASR"""
     def __init__(self, images, labels, positionsDict, triggers, batchsize, n_party = 2, **kwargs):
         self.ids = list(range(images.shape[0]))
         self.images = images

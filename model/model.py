@@ -4,6 +4,7 @@ from keras import backend as K
 from .layers import *
 from classification_models.keras import Classifiers
 
+# Build VFL model
 def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: int = 1, n_party: int = 2):
     inputs = []
     features = []
@@ -39,6 +40,7 @@ def model_factory(backbone: str = "resnet18", n_classes: int = 10, n_attackers: 
 
     return model, attackerClassifiers
 
+# Build model to find trigger
 def buildTriggerModel(model, windowSize, features, idx):
     x_sub_s = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'x_sub_s')
     masks = tf.keras.layers.Input(shape = (windowSize, windowSize, 3, None, None, 3), dtype=tf.float32, name = f'masks')
@@ -54,6 +56,7 @@ def buildTriggerModel(model, windowSize, features, idx):
     triggerModel = tf.keras.models.Model(inputs = [x_sub_s, masks], outputs = [distance])
     return triggerModel
 
+# Build model to extract features
 def buildExtractModel(model, idx):
     x_t = tf.keras.layers.Input(shape = (None, None, 3), dtype=tf.float32, name = f'x_t')
     newModel = tf.keras.models.clone_model(model)
