@@ -1,0 +1,5 @@
+scikit-learn
+pandas
+tensorflow
+keras-cv
+image-classifiers
