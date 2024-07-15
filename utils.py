@@ -115,6 +115,7 @@ def optimalSelection(model, X_train, Y_train, partyIdxs, nparty, strategy, batch
     return min(distances.keys(), key=distances.get)
 
 def unlearning(model, eps=1e-4):
+    """Using Differential Privacy to unlearning model 'scrub' with eps is a small number."""
     for i in range(len(model.trainable_variables)):
         model.trainable_variables[i].assign(model.trainable_variables[i]*(1+tf.random.normal([1], 0, eps)[0]))
     return model
